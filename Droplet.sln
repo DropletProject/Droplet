@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.Module", "src\Droplet.Module\Droplet.Module.csproj", "{898DC68C-8069-408D-B422-6C2C4738123E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Module", "src\Droplet.Module\Droplet.Module.csproj", "{898DC68C-8069-408D-B422-6C2C4738123E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7DAAF3BD-0FAB-42AE-99B4-EFD5D4430256}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4B24B8AD-A125-4216-A969-45096FD4F938}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.Module.Test", "test\Droplet.Module.Test\Droplet.Module.Test.csproj", "{F88F2250-327F-455B-9671-43443FAF0250}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Module.Test", "test\Droplet.Module.Test\Droplet.Module.Test.csproj", "{F88F2250-327F-455B-9671-43443FAF0250}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.Bootstrapper", "src\Droplet.Bootstrapper\Droplet.Bootstrapper.csproj", "{B041E438-7520-4892-8B82-9F8D3B458063}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Bootstrapper", "src\Droplet.Bootstrapper\Droplet.Bootstrapper.csproj", "{B041E438-7520-4892-8B82-9F8D3B458063}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.AutoDI", "src\Droplet.AutoDI\Droplet.AutoDI.csproj", "{9C9AB0B3-2B24-4E07-A3D5-719E0526DCE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.AutoDI", "src\Droplet.AutoDI\Droplet.AutoDI.csproj", "{9C9AB0B3-2B24-4E07-A3D5-719E0526DCE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.AutoMapper", "src\Droplet.AutoMapper\Droplet.AutoMapper.csproj", "{8830805D-3F21-4473-B47C-CF65DED2C81A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{9C9AB0B3-2B24-4E07-A3D5-719E0526DCE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C9AB0B3-2B24-4E07-A3D5-719E0526DCE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C9AB0B3-2B24-4E07-A3D5-719E0526DCE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8830805D-3F21-4473-B47C-CF65DED2C81A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8830805D-3F21-4473-B47C-CF65DED2C81A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8830805D-3F21-4473-B47C-CF65DED2C81A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8830805D-3F21-4473-B47C-CF65DED2C81A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
