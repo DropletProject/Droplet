@@ -1,4 +1,4 @@
-﻿using Droplet.Module;
+﻿using Droplet.AutoDI.ServiceSelector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,37 +9,67 @@ namespace Droplet.AutoDI
 {
     public class ComponentRegistrar : IComponentRegistrar
     {
-        private IModuleFinder _moduleFinder;
         private IRegister _register;
 
-        public ComponentRegistrar(IModuleFinder moduleFinder, IRegister register)
+        public ComponentRegistrar(IRegister register)
         {
-            _moduleFinder = moduleFinder;
             _register = register;
         }
 
-        public void AutoRegister()
+        public void RegisterComponent(Type component)
         {
-           var moduleAssemblies =  _moduleFinder.GetModuleAssemblies();
-            foreach (var aAssembly in moduleAssemblies)
+            var selectors = GetServiceSelectors(component);
+            var services = GetServices(component, selectors);
+
+            foreach (var aService in services)
             {
-                registerAssembly(aAssembly);
+                _register.Register(component, aService);
             }
         }
 
-        private void registerAssembly(Assembly assembly)
+        public void RegisterAssembly(params Assembly[] assemblies)
         {
-            var allTypes = assembly.GetTypes().Where(p => getComponentAttr(p) != null);
-            foreach (var aComponent in allTypes)
+            foreach (var aAssemby in assemblies)
             {
-                var attr = getComponentAttr(aComponent);
-                _register.Regiser(aComponent, attr);
+                var allTypes = aAssemby.GetTypes().Where(p => p.GetComponentAttr() != null);
+                foreach (var aComponent in allTypes)
+                {
+                    RegisterComponent(aComponent);
+                }
             }
         }
 
-        private ComponentAttribute getComponentAttr(Type type)
+        private List<IServiceSelector> GetServiceSelectors(Type component)
         {
-            return type.GetCustomAttribute<ComponentAttribute>();
+            var attr = component.GetComponentAttr();
+
+            var serviceSelector = new List<IServiceSelector>();
+
+            if (attr.RegisterService.HasFlag(RegisterServiceType.All))
+            {
+                serviceSelector.Add(new AllServiceSelector());
+                return serviceSelector;
+            }
+
+            if (attr.RegisterService.HasFlag(RegisterServiceType.First))
+                serviceSelector.Add(new FirstServiceSelector());
+            if (attr.RegisterService.HasFlag(RegisterServiceType.Partition))
+                serviceSelector.Add(new PartitionServiceSelector());
+            if (attr.RegisterService.HasFlag(RegisterServiceType.Self))
+                serviceSelector.Add(new SelfServiceSelector());
+
+            return serviceSelector;
+        }
+
+        private List<Type> GetServices(Type component, List<IServiceSelector> selectors)
+        {
+            var services = new List<Type>();
+            foreach (var aSelector in selectors)
+            {
+                services.AddRange(aSelector.SelectServices(component));
+            }
+
+            return services;
         }
     }
 }

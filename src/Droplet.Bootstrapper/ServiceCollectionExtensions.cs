@@ -2,7 +2,7 @@
 
 namespace Droplet.Bootstrapper
 {
-    public class Class1
+    public static class ServiceCollectionExtensions
     {
     }
 }

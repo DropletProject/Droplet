@@ -12,6 +12,7 @@ namespace Droplet.Module
         private List<Assembly> _moduleAssemblies = new List<Assembly>();
         private string _moduleKeyword;
         private List<IAssemblySelector> _selectors = new List<IAssemblySelector>();
+        private bool _isInited = false;
 
         public ModuleManager()
         {
@@ -24,6 +25,10 @@ namespace Droplet.Module
 
         public List<Assembly> GetModuleAssemblies()
         {
+            if (!_isInited) {
+                Init();
+            }
+
             return _moduleAssemblies;
         }
 
@@ -35,11 +40,16 @@ namespace Droplet.Module
 
         public void Init()
         {
-            initSelectors();
-            excuteSelector();
+            if (_isInited) {
+                return;
+            }
+
+            InitSelectors();
+            ExcuteSelector();
+            _isInited = true;
         }
 
-        private void initSelectors()
+        private void InitSelectors()
         {
             if (!string.IsNullOrEmpty(_moduleKeyword))
                 _selectors.Add(new KeywordAssemblySelector(_moduleKeyword));
@@ -49,7 +59,7 @@ namespace Droplet.Module
             _selectors.Add(new InitModuleAssemblySelector());
         }
 
-        private void excuteSelector()
+        private void ExcuteSelector()
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
             _selectors.ForEach(p => _moduleAssemblies.AddRange(p.SelectModuleAssembly(allAssemblies)));
