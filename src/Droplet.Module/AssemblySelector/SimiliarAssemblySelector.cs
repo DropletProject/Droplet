@@ -9,12 +9,24 @@ namespace Droplet.Module.AssemblySelector
     public class SimiliarAssemblySelector : IAssemblySelector
     {
         private string[] _systemPrefix = { "System.", "Microsoft.", "mscorlib" };
+        private Assembly _entryAssembly;
+
+
+        public SimiliarAssemblySelector()
+        {
+
+        }
+
+        public SimiliarAssemblySelector(Assembly entryAssembly)
+        {
+            _entryAssembly = entryAssembly;
+        }
 
         public List<Assembly> SelectModuleAssembly(List<Assembly> waitSelectAssemblies)
         {
-            var assemblySameCountClt = buildAssemblySameCounts(filterSystemAssemblies(waitSelectAssemblies));
+            var assemblySameCountClt = BuildAssemblySameCounts(filterSystemAssemblies(waitSelectAssemblies));
             var noEntryAssemblies = assemblySameCountClt.GetMaxTotalCountAssemblies();
-            noEntryAssemblies.Add(Assembly.GetEntryAssembly());
+            noEntryAssemblies.Add(_entryAssembly);
 
             return noEntryAssemblies;
         }
@@ -29,16 +41,19 @@ namespace Droplet.Module.AssemblySelector
             return filteredAssemblies;
         }
 
-        private AssemblySameCountCollection buildAssemblySameCounts(List<Assembly> waitBuildAssemblies)
+        private AssemblySameCountCollection BuildAssemblySameCounts(List<Assembly> waitBuildAssemblies)
         {
-            var entryAssemblyName = Assembly.GetEntryAssembly().FullName;
+            if (_entryAssembly == null)
+                _entryAssembly = Assembly.GetEntryAssembly();
+            var entryAssemblyName = _entryAssembly.FullName;
+
             var assemblySameCounts = new AssemblySameCountCollection();
             foreach (var aAssembly in waitBuildAssemblies)
             {
                 if (entryAssemblyName == aAssembly.FullName)
                     continue;
 
-                var samecount = getFirstNameSameCount(entryAssemblyName, aAssembly.FullName);
+                var samecount = GetFirstNameSameCount(entryAssemblyName, aAssembly.FullName);
 
                 var updateSameCount = assemblySameCounts.FirstOrDefault(p => p.SameCount == samecount);
                 if (updateSameCount == null)
@@ -53,7 +68,7 @@ namespace Droplet.Module.AssemblySelector
             return assemblySameCounts;
         }
 
-        private int getFirstNameSameCount(string source, string compare)
+        private int GetFirstNameSameCount(string source, string compare)
         {
             var sameCount = 0;
             for (var i = 0; i < source.Length; i++)

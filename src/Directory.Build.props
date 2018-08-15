@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup Label="Common package properties">
+    <Authors>Droplet</Authors>
+    <Copyright>Copyright (c) Droplet contributors. (https://github.com/DropletProject/Droplet)</Copyright>
+    <PackageProjectUrl>https://github.com/DropletProject/Droplet</PackageProjectUrl>
+    <PackageIconUrl></PackageIconUrl>
+    <PackageLicenseUrl>https://github.com/DropletProject/Droplet/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/DropletProject/Droplet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
+</Project>

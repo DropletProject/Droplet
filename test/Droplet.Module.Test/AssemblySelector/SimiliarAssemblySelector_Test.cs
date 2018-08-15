@@ -18,5 +18,14 @@ namespace Droplet.Module.Test.AssemblySelector
             var assemblies = assemFinder.SelectModuleAssembly(allAssemblies);
             Assert.AreEqual(1, assemblies.Count);
         }
+
+        [TestMethod]
+        public void ShouldHave_Module()
+        {
+            var assemFinder = new SimiliarAssemblySelector(typeof(SimiliarAssemblySelector_Test).Assembly);
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var assemblies = assemFinder.SelectModuleAssembly(allAssemblies);
+            Assert.AreEqual(2, assemblies.Count);
+        }
     }
 }

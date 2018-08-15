@@ -4,4 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Droplet.AutoDI.Dotnet\Droplet.AutoDI.Dotnet.csproj" />
+    <ProjectReference Include="..\Droplet.Module\Droplet.Module.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -11,16 +11,14 @@ namespace Droplet.Module
     {
         private List<Assembly> _moduleAssemblies = new List<Assembly>();
         private string _moduleKeyword;
+        private Assembly _entryAssembly;
         private List<IAssemblySelector> _selectors = new List<IAssemblySelector>();
         private bool _isInited = false;
 
-        public ModuleManager()
-        {
-        }
-
-        public ModuleManager(string moduleKeyword)
+        public ModuleManager(string moduleKeyword = "", Assembly entryAssembly = null)
         {
             _moduleKeyword = moduleKeyword;
+            _entryAssembly = entryAssembly;
         }
 
         public List<Assembly> GetModuleAssemblies()
@@ -54,7 +52,7 @@ namespace Droplet.Module
             if (!string.IsNullOrEmpty(_moduleKeyword))
                 _selectors.Add(new KeywordAssemblySelector(_moduleKeyword));
             else
-                _selectors.Add(new SimiliarAssemblySelector());
+                _selectors.Add(new SimiliarAssemblySelector(_entryAssembly));
 
             _selectors.Add(new InitModuleAssemblySelector());
         }
