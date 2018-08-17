@@ -22,11 +22,10 @@ namespace Droplet.EventBus.RabbitMQ
         private readonly int _retryCount;
         private readonly ILogger _logger;
 
-        public RabbitMQConnectionManager(List<RabbitServerSetting> rabbitServerSettings, ILogger<RabbitMQConnectionManager> logger, int retryCount)
+        public RabbitMQConnectionManager(RabbitMQOptions rabbitMQOptions , ILogger<RabbitMQConnectionManager> logger)
         {
-            if (rabbitServerSettings == null || rabbitServerSettings.Count == 0) throw new ArgumentNullException(nameof(rabbitServerSettings));
-            _rabbitServerSettings = rabbitServerSettings;
-            _retryCount = retryCount;
+            _rabbitServerSettings = rabbitMQOptions.Servers;
+            _retryCount = rabbitMQOptions.RetryCount;
             _logger = logger;
         }
 

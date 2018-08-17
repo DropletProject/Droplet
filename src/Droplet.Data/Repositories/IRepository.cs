@@ -10,7 +10,12 @@ using System.Threading.Tasks;
 
 namespace Droplet.Data.Repositories
 {
-    public interface IRepository<TEntity> where TEntity : class, IEntity
+    public interface IRepository
+    {
+
+    }
+
+    public interface IRepository<TEntity>: IRepository where TEntity : class, IEntity
     {
         /// <summary>
         /// 读取列表
@@ -90,4 +95,6 @@ namespace Droplet.Data.Repositories
 
         Task DeleteAsync(TPrimaryKey id);
     }
+
+   
 }

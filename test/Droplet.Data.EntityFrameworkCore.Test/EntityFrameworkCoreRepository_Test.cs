@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace Droplet.Data.EntityFrameworkCore.Test
 {
     [TestClass]
-    public class EntityFrameworkCoreRepositoryTest
+    public class EntityFrameworkCoreRepository_Test
     {
         static TestDbContext _context;
         static EntityFrameworkCoreUnitOfWork<TestDbContext> _unitOfWork;
-        static EntityFrameworkCoreRepositoryTest()
+        static EntityFrameworkCoreRepository_Test()
         {
             var testWithIds = new List<TestWithId>
             {

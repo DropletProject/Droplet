@@ -4,6 +4,15 @@ using System.Text;
 
 namespace Droplet.EventBus.RabbitMQ
 {
+
+    public class RabbitMQOptions
+    {
+        public List<RabbitServerSetting> Servers { get; set; }
+
+        public int RetryCount { get; set; } = 5;
+    }
+
+
     public class RabbitServerSetting
     {
 

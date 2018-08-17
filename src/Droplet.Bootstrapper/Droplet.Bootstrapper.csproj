@@ -5,7 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Scrutor" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Droplet.AutoDI.Dotnet\Droplet.AutoDI.Dotnet.csproj" />
+    <ProjectReference Include="..\Droplet.Data.EntityFrameworkCore\Droplet.Data.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Droplet.Module\Droplet.Module.csproj" />
   </ItemGroup>
 

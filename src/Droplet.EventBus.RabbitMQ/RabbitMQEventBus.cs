@@ -29,13 +29,13 @@ namespace Droplet.EventBus.RabbitMQ
         private readonly Dictionary<string, IModel> _consumerChannels;
 
         public RabbitMQEventBus(IRabbitMQConnectionManager rabbitMQConnectionManager, ILogger<RabbitMQEventBus> logger,
-            IServiceProvider serviceProvider, IEventBusSubscriptionsManager subsManager, int retryCount = 5)
+            IServiceProvider serviceProvider, IEventBusSubscriptionsManager subsManager, RabbitMQOptions rabbitMQOptions)
         {
             _rabbitMQConnectionManager = rabbitMQConnectionManager ?? throw new ArgumentNullException(nameof(rabbitMQConnectionManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
             _serviceProvider = serviceProvider;
-            _retryCount = retryCount;
+            _retryCount = rabbitMQOptions.RetryCount;
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
 
             _consumerChannels = new Dictionary<string, IModel>();
