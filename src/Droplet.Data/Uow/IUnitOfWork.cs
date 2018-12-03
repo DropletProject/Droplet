@@ -16,5 +16,7 @@ namespace Droplet.Data.Uow
 
         Task CompleteAsync();
 
+        event EventHandler Completed;
+
     }
 }

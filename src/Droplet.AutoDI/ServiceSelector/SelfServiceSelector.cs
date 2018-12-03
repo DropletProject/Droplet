@@ -8,7 +8,14 @@ namespace Droplet.AutoDI.ServiceSelector
     {
         public IEnumerable<Type> SelectServices(Type component)
         {
-            yield return component;
+            if (component.IsGenericType)
+            {
+                yield return component.GetGenericTypeDefinition();
+            }
+            else
+            {
+                yield return component;
+            }
         }
     }
 }

@@ -9,8 +9,8 @@ namespace Droplet.AutoDI.ServiceSelector
     {
         public IEnumerable<Type> SelectServices(Type component)
         {
-            var allInerfaces = component.GetInterfaces().Where(p => p.IsInterface).ToList();
-            allInerfaces.Add(component);
+            var allInerfaces = component.GetInterfaces().Where(p => p.IsInterface).ToServiceType();
+            allInerfaces.ToList().Add(component);
             return allInerfaces;
         }
     }

@@ -9,7 +9,12 @@ namespace Droplet.AutoDI.ServiceSelector
     {
         public IEnumerable<Type> SelectServices(Type component)
         {
-            var interfaces = component.GetInterfaces().Where(p=> p.IsInterface);
+            return selectServices(component).ToServiceType();
+        }
+
+        private IEnumerable<Type> selectServices(Type component)
+        {
+            var interfaces = component.GetInterfaces().Where(p => p.IsInterface);
             foreach (var aInterface in interfaces)
             {
                 var name = aInterface.Name;

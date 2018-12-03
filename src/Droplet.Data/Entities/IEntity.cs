@@ -19,6 +19,9 @@ namespace Droplet.Data.Entities
     {
 
         TPrimaryKey Id { get; set; }
+
+        bool IsTransient();
+
     }
 
    

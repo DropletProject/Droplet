@@ -1,7 +1,6 @@
 ﻿using Droplet.Data.Entities;
 using Droplet.Data.EntityFrameworkCore;
 using Droplet.Data.Repositories;
-using Droplet.Data.Services;
 using Droplet.Data.Uow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +15,11 @@ namespace Droplet.Bootstrapper
 {
     public static  class EntityFrameworkCoreBuilderExtensions
     {
-        public static DropletBuilder AddEntityFrameworkCore<TContext>(this DropletBuilder builder, Action<DbContextOptionsBuilder> optionsAction) where TContext : DbContext
+        public static DropletBuilder AddEntityFrameworkCore<TContext>(this DropletBuilder builder, Action<DbContextOptionsBuilder> optionsAction = null) where TContext : DbContext
         {
-            builder.ServiceCollection.AddMediator();
+            builder.AddMediator();
             builder.ServiceCollection.AddDbContext<TContext>(optionsAction);
             builder.ServiceCollection.AddScoped(typeof(IUnitOfWork), typeof(EntityFrameworkCoreUnitOfWork<TContext>));
-            builder.ServiceCollection.AddTransient(typeof(IQueryService), typeof(EntityFrameworkCoreQueryService<TContext>));
             builder.ServiceCollection.RegisterGenericRepositoriesAndMatchDbContexes(typeof(TContext));
 
             builder.ServiceCollection.Scan(scan =>
@@ -34,10 +32,11 @@ namespace Droplet.Bootstrapper
             return builder;
         }
 
-        private static void AddMediator(this IServiceCollection services)
+        private static void AddMediator(this DropletBuilder builder)
         {
-            services.AddScoped<ServiceFactory>(p => p.GetService);
-            services.AddScoped<IMediator, Mediator>();
+            builder.ServiceCollection.AddScoped<ServiceFactory>(p => p.GetService);
+            builder.ServiceCollection.AddScoped<IMediator, Mediator>();
+            builder.ServiceCollection.AddMediatR(builder.RegisterAssemblys);
         }
 
 

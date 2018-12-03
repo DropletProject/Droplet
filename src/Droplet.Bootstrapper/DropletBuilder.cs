@@ -14,7 +14,7 @@ namespace Droplet.Bootstrapper
             RegisterAssemblys = assembly;
         }
 
-        public List<Assembly> RegisterAssemblys { get; private set; }
+        public IReadOnlyList<Assembly> RegisterAssemblys { get; private set; }
 
         public IServiceCollection ServiceCollection { get; private set; }
     }

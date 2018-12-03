@@ -38,6 +38,18 @@ namespace Droplet.AutoDI.Dotnet.Test
             s = sp.GetService<ITestClass>();
             Assert.AreEqual("Test", s.Demo());
         }
+
+        [TestMethod]
+        public void TestRegisterComponent_Generic()
+        {
+            var services = new ServiceCollection();
+            var reg = new DotnetRegister(services);
+
+            reg.Register(typeof(GenericClass<>), typeof(IGenericInterface<>));
+            var sp = services.BuildServiceProvider();
+            var s = sp.GetService<IGenericInterface<TransientClass>>();
+            Assert.AreEqual("HelloWorld", s.Demo());
+        }
     }
 
 
@@ -96,6 +108,20 @@ namespace Droplet.AutoDI.Dotnet.Test
         public void SetDemo(string demo)
         {
             _demo = demo;
+        }
+    }
+
+    public interface IGenericInterface<T>
+    {
+        string Demo();
+    }
+
+    [Component(RegisterService = RegisterServiceType.Self | RegisterServiceType.First)]
+    public class GenericClass<T> : IGenericInterface<T>
+    {
+        public string Demo()
+        {
+            return "HelloWorld";
         }
     }
 }

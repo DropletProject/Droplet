@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using Droplet.Module.AssemblySelector;
+using System.IO;
 
 namespace Droplet.Module
 {
@@ -59,8 +60,18 @@ namespace Droplet.Module
 
         private void ExcuteSelector()
         {
+            LoadAssemblies(AppDomain.CurrentDomain.BaseDirectory);
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
             _selectors.ForEach(p => _moduleAssemblies.AddRange(p.SelectModuleAssembly(allAssemblies)));
+        }
+
+        protected void LoadAssemblies(string path)
+        {
+            foreach (string file in Directory.GetFiles(path, "*.dll"))
+            {
+                var assemblyName = AssemblyName.GetAssemblyName(file);
+                AppDomain.CurrentDomain.Load(assemblyName);
+            }
         }
     }
 

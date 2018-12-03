@@ -56,7 +56,6 @@ namespace Droplet.Data.Repositories
         /// <returns></returns>
         Task InsertAsync( TEntity entity);
 
-
         /// <summary>
         /// 更新指定
         /// </summary>
@@ -85,7 +84,7 @@ namespace Droplet.Data.Repositories
     }
 
 
-    public interface IRepository<TEntity, TPrimaryKey> where TEntity : class, IEntity<TPrimaryKey>
+    public interface IRepository<TEntity, TPrimaryKey>: IRepository<TEntity> where TEntity : class, IEntity<TPrimaryKey>
     {
         TEntity Get(TPrimaryKey id);
 
@@ -94,6 +93,19 @@ namespace Droplet.Data.Repositories
         void Delete(TPrimaryKey id);
 
         Task DeleteAsync(TPrimaryKey id);
+
+        /// <summary>
+        /// 插入一个实体并且返回ID
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        TPrimaryKey InsertAndGetId(TEntity entity);
+
+        /// <summary>
+        /// 插入一个实体并且返回ID
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns></returns>
+        Task<TPrimaryKey> InsertAndGetIdAsync(TEntity entity);
     }
 
    

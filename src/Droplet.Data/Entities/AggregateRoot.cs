@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Droplet.Data.Entities
 {
-    public abstract class AggregateRoot
+    public abstract class AggregateRoot : Entity<int>
     {
         public AggregateRoot()
         {

@@ -44,6 +44,24 @@ namespace Droplet.AutoDI.Test
         }
 
         [TestMethod]
+        public void TestRegisterComponent_GenericType()
+        {
+            var register = A.Fake<IRegister>();
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            {
+                if ((Type)ctx.Arguments[0] != typeof(TestGenericType<>))
+                    Assert.Fail("component type is not correct");
+
+                var srvType = (Type)ctx.Arguments[1];
+                if (srvType != typeof(IGenericType<>))
+                    Assert.Fail("service type is not correct");
+            });
+
+            var componentRegistrar = new ComponentRegistrar(register);
+            componentRegistrar.RegisterComponent(typeof(TestGenericType<>));
+        }
+
+        [TestMethod]
         public void TestRegisterComponent_All()
         {
             var register = A.Fake<IRegister>();
@@ -83,6 +101,7 @@ namespace Droplet.AutoDI.Test
     public interface ISecond { }
     public interface IThird { }
     public interface ITestSelfAndPartition{ }
+    public interface IGenericType<T> { }
 
     [Component]
     public class TestFirstClass : IFirst, ISecond, IThird
@@ -95,4 +114,7 @@ namespace Droplet.AutoDI.Test
     [Component(RegisterService = RegisterServiceType.All)]
     public class TestAllClass : IFirst, ISecond, IThird
     { }
+
+    [Component]
+    public class TestGenericType<T> : IGenericType<T> { } 
 }

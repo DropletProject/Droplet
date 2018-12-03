@@ -12,10 +12,10 @@ namespace Droplet.Data.EntityFrameworkCore
 {
     public class EntityFrameworkCoreRepository<TEntity, TContext> : RepositoryBase<TEntity> where TEntity : class, IEntity where TContext : DbContext
     {
-        private readonly EntityFrameworkCoreUnitOfWork<TContext> _unitOfWork;
+        protected readonly EntityFrameworkCoreUnitOfWork<TContext> _unitOfWork;
 
 
-        public virtual DbSet<TEntity> Table { get { return _unitOfWork.GetTable<TEntity>(); } }
+        public virtual DbSet<TEntity> Table { get { return _unitOfWork.Context.Set<TEntity>(); } }
 
 
         public EntityFrameworkCoreRepository(IUnitOfWork unitOfWork)
@@ -30,22 +30,35 @@ namespace Droplet.Data.EntityFrameworkCore
 
         public override IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
-            return Table.Where(predicate);
+            return GetAll().Where(predicate);
         }
 
         public override void Insert(TEntity entity)
         {
             Table.Add(entity);
-
         }
         public override void Delete(TEntity entity)
         {
+            AttachIfNot(entity);
             Table.Remove(entity);
         }
 
         public override void Update(TEntity entity)
         {
+            AttachIfNot(entity);
+            _unitOfWork.Context.Entry(entity).State = EntityState.Modified;
             Table.Update(entity);
+        }
+
+        protected virtual void AttachIfNot(TEntity entity)
+        {
+            var entry = _unitOfWork.Context.ChangeTracker.Entries().FirstOrDefault(ent => ent.Entity == entity);
+            if (entry != null)
+            {
+                return;
+            }
+
+            Table.Attach(entity);
         }
     }
 
@@ -68,14 +81,39 @@ namespace Droplet.Data.EntityFrameworkCore
             return Task.FromResult(0);
         }
 
-        public TEntity Get(TPrimaryKey id)
+        public virtual TEntity Get(TPrimaryKey id)
         {
-            return GetAll().FirstOrDefault(CreateEqualityExpressionForId(id));
+            var entity = GetAll().FirstOrDefault(CreateEqualityExpressionForId(id));
+            if(entity == null)
+            {
+                throw new ArgumentException($"{typeof(TEntity).Name}不存在Id={id}的记录");
+            }
+            return entity;
         }
 
-        public Task<TEntity> GetAsync(TPrimaryKey id)
+        public virtual Task<TEntity> GetAsync(TPrimaryKey id)
         {
             return Task.FromResult(Get(id));
+        }
+
+        public virtual TPrimaryKey InsertAndGetId(TEntity entity)
+        {
+            Insert(entity);
+            if(entity.IsTransient())
+            {
+                _unitOfWork.Context.SaveChanges();
+            }
+            return entity.Id;
+        }
+
+        public virtual async Task<TPrimaryKey> InsertAndGetIdAsync(TEntity entity)
+        {
+            await InsertAsync(entity);
+            if (entity.IsTransient())
+            {
+                await _unitOfWork.Context.SaveChangesAsync();
+            }
+            return entity.Id;
         }
 
         protected virtual Expression<Func<TEntity, bool>> CreateEqualityExpressionForId(TPrimaryKey id)
@@ -89,5 +127,7 @@ namespace Droplet.Data.EntityFrameworkCore
 
             return Expression.Lambda<Func<TEntity, bool>>(lambdaBody, lambdaParam);
         }
+
+       
     }
 }

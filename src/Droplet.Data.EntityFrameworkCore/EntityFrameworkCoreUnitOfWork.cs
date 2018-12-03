@@ -2,6 +2,7 @@
 using Droplet.Data.Uow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,28 +16,30 @@ namespace Droplet.Data.EntityFrameworkCore
 {
     public class EntityFrameworkCoreUnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
     {
+        public event EventHandler Completed;
+
+
         private readonly IMediator _eventBus;
-        private readonly TContext _context;
+        private IDbContextTransaction _dbContextTransaction;
+
+        public TContext Context { get; private set; }
+
 
         public EntityFrameworkCoreUnitOfWork(TContext context, IMediator eventBus)
         {
             _eventBus = eventBus;
-            _context = context;
-        }
-
-        public DbSet<TEntity> GetTable<TEntity>() where TEntity :class
-        {
-            return _context.Set<TEntity>();
+            Context = context;
         }
 
 
         public void Begin(IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted)
         {
+            _dbContextTransaction = Context.Database.BeginTransaction(isolationLevel);
         }
 
         private async Task PublishDomainEventsAsync()
         {
-            var domainEntities = _context.ChangeTracker
+            var domainEntities = Context.ChangeTracker
                 .Entries<AggregateRoot>()
                 .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any());
 
@@ -59,18 +62,37 @@ namespace Droplet.Data.EntityFrameworkCore
         public void Complete()
         {
             PublishDomainEventsAsync().Wait();
-            _context.SaveChanges();
+            Context.SaveChanges();
+            _dbContextTransaction?.Commit();
+
+            OnCompleted();
         }
 
         public async Task CompleteAsync()
         {
             await PublishDomainEventsAsync();
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
+            _dbContextTransaction?.Commit();
+
+            OnCompleted();
+        }
+
+        /// <summary>
+        /// Called to trigger <see cref="Completed"/> event.
+        /// </summary>
+        protected virtual void OnCompleted()
+        {
+            if (Completed == null)
+            {
+                return;
+            }
+            Completed(this, EventArgs.Empty);
         }
 
 
         private bool _disposed = false;
-      
+
+
         public void Dispose()
         {
             Dispose(true);
@@ -85,7 +107,8 @@ namespace Droplet.Data.EntityFrameworkCore
             {
                 if (disposing)
                 {
-                    _context.Dispose();
+                    _dbContextTransaction?.Dispose();
+                    Context.Dispose();
                 }
             }
             _disposed = true;
