@@ -81,6 +81,29 @@ namespace Droplet.Data.Repositories
         /// <returns></returns>
         Task DeleteAsync( TEntity entity);
 
+        /// <summary>
+        /// 获取第一个实体
+        /// </summary>
+        /// <returns></returns>
+        TEntity FirstOrDefault();
+
+        /// <summary>
+        /// 获取第一个实体
+        /// </summary>
+        /// <returns></returns>
+        Task<TEntity> FirstOrDefaultAsync();
+
+        /// <summary>
+        /// 获取第一个实体
+        /// </summary>
+        /// <returns></returns>
+        TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
+
+        /// <summary>
+        /// 获取第一个实体
+        /// </summary>
+        /// <returns></returns>
+        Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
     }
 
 

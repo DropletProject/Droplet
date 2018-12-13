@@ -18,11 +18,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Bootstrapper", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.AutoDI", "src\Droplet.AutoDI\Droplet.AutoDI.csproj", "{9C9AB0B3-2B24-4E07-A3D5-719E0526DCE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.AutoDI.Dotnet", "src\Droplet.AutoDI.Dotnet\Droplet.AutoDI.Dotnet.csproj", "{8FF7554C-76F3-4338-80F0-0B354E5E66B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.AutoDI.Dotnet", "src\Droplet.AutoDI.Dotnet\Droplet.AutoDI.Dotnet.csproj", "{8FF7554C-76F3-4338-80F0-0B354E5E66B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.AutoDI.Test", "test\Droplet.AutoDI.Test\Droplet.AutoDI.Test.csproj", "{72418F7D-40E9-404A-80A2-D0750E514423}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.AutoDI.Test", "test\Droplet.AutoDI.Test\Droplet.AutoDI.Test.csproj", "{72418F7D-40E9-404A-80A2-D0750E514423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.AutoDI.Dotnet.Test", "test\Droplet.AutoDI.Dotnet.Test\Droplet.AutoDI.Dotnet.Test.csproj", "{AB25D9B8-0E3A-428B-8484-CB6DDF05109C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.AutoDI.Dotnet.Test", "test\Droplet.AutoDI.Dotnet.Test\Droplet.AutoDI.Dotnet.Test.csproj", "{AB25D9B8-0E3A-428B-8484-CB6DDF05109C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Data", "src\Droplet.Data\Droplet.Data.csproj", "{0156286C-CAB4-413D-BA34-25A39418D84F}"
 EndProject
@@ -34,7 +34,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.EventBus.RabbitMQ",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Data.EntityFrameworkCore.Test", "test\Droplet.Data.EntityFrameworkCore.Test\Droplet.Data.EntityFrameworkCore.Test.csproj", "{9AAF4C33-BC2B-4270-87C6-950B9FF44658}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.Bootstrapper.Test", "test\Droplet.Bootstrapper.Test\Droplet.Bootstrapper.Test.csproj", "{15381156-7E2A-40CB-81B2-FAE30157C790}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Droplet.Bootstrapper.Test", "test\Droplet.Bootstrapper.Test\Droplet.Bootstrapper.Test.csproj", "{15381156-7E2A-40CB-81B2-FAE30157C790}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.Utility", "src\Droplet.Utility\Droplet.Utility.csproj", "{970E4A20-FFF4-46D9-8C3A-A5BD6A98A5AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Droplet.GrpcHost", "src\Droplet.GrpcHost\Droplet.GrpcHost.csproj", "{EE3C9D3E-590F-426E-98FC-ED2DBF2F3B41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +98,14 @@ Global
 		{15381156-7E2A-40CB-81B2-FAE30157C790}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15381156-7E2A-40CB-81B2-FAE30157C790}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15381156-7E2A-40CB-81B2-FAE30157C790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{970E4A20-FFF4-46D9-8C3A-A5BD6A98A5AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{970E4A20-FFF4-46D9-8C3A-A5BD6A98A5AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{970E4A20-FFF4-46D9-8C3A-A5BD6A98A5AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{970E4A20-FFF4-46D9-8C3A-A5BD6A98A5AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE3C9D3E-590F-426E-98FC-ED2DBF2F3B41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE3C9D3E-590F-426E-98FC-ED2DBF2F3B41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE3C9D3E-590F-426E-98FC-ED2DBF2F3B41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE3C9D3E-590F-426E-98FC-ED2DBF2F3B41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +124,8 @@ Global
 		{D08CFCA4-1C79-48CD-A9B1-AD8159861D0C} = {7DAAF3BD-0FAB-42AE-99B4-EFD5D4430256}
 		{9AAF4C33-BC2B-4270-87C6-950B9FF44658} = {4B24B8AD-A125-4216-A969-45096FD4F938}
 		{15381156-7E2A-40CB-81B2-FAE30157C790} = {4B24B8AD-A125-4216-A969-45096FD4F938}
+		{970E4A20-FFF4-46D9-8C3A-A5BD6A98A5AB} = {7DAAF3BD-0FAB-42AE-99B4-EFD5D4430256}
+		{EE3C9D3E-590F-426E-98FC-ED2DBF2F3B41} = {7DAAF3BD-0FAB-42AE-99B4-EFD5D4430256}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0B70B61-25A0-4288-89BF-A5F6889D8128}

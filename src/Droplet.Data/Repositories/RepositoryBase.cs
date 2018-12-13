@@ -20,6 +20,14 @@ namespace Droplet.Data.Repositories
             return Task.FromResult(0);
         }
 
+        public abstract TEntity FirstOrDefault();
+
+        public abstract TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);
+
+        public abstract Task<TEntity> FirstOrDefaultAsync();
+
+        public abstract Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
+
         public abstract IQueryable<TEntity> GetAll();
 
         public abstract IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate);

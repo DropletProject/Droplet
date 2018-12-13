@@ -60,6 +60,26 @@ namespace Droplet.Data.EntityFrameworkCore
 
             Table.Attach(entity);
         }
+
+        public override TEntity FirstOrDefault()
+        {
+            return Table.FirstOrDefault();
+        }
+
+        public override TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
+        {
+            return Table.FirstOrDefault(predicate);
+        }
+
+        public override async Task<TEntity> FirstOrDefaultAsync()
+        {
+            return await Table.FirstOrDefaultAsync();
+        }
+
+        public override async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await Table.FirstOrDefaultAsync(predicate);
+        }
     }
 
     public class EntityFrameworkCoreRepository<TEntity, TPrimaryKey, TContext>
@@ -91,9 +111,14 @@ namespace Droplet.Data.EntityFrameworkCore
             return entity;
         }
 
-        public virtual Task<TEntity> GetAsync(TPrimaryKey id)
+        public virtual async Task<TEntity> GetAsync(TPrimaryKey id)
         {
-            return Task.FromResult(Get(id));
+            return await Table.FindAsync(id);
+        }
+
+        public override async Task InsertAsync(TEntity entity)
+        {
+            await Table.AddAsync(entity);
         }
 
         public virtual TPrimaryKey InsertAndGetId(TEntity entity)
