@@ -8,14 +8,15 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddGrpcServiceProxy(this IServiceCollection services,Action<GrpcServiceProxyConfiguration> action = null)
+
+        public static IServiceCollection AddGrpcServiceProxy(this IServiceCollection services, Action<GrpcServiceProxyBuilder> action = null)
         {
-            var configuration = new GrpcServiceProxyConfiguration();
-            action?.Invoke(configuration);
-            if(configuration.CallInterceptorTypes != null && configuration.CallInterceptorTypes.Length > 0)
+            var builder = new GrpcServiceProxyBuilder();
+            action?.Invoke(builder);
+            if (builder.CallInterceptorTypes != null && builder.CallInterceptorTypes.Count > 0)
             {
                 var baseType = typeof(CallInterceptor);
-                foreach (var type in configuration.CallInterceptorTypes)
+                foreach (var type in builder.CallInterceptorTypes)
                 {
                     services.AddSingleton(baseType, type);
                 }

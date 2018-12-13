@@ -5,13 +5,13 @@ using System.Text;
 
 namespace Droplet.Discovery.Consul
 {
-    public class ConsulClientFactory
+    internal class ConsulClientFactory
     {
-        public static IConsulClient Create(ConsulDiscoveryConfiguration configuration)
+        public static IConsulClient Create(Uri address)
         {
             return new ConsulClient(p =>
             {
-                p.Address = configuration.Address;
+                p.Address = address;
             });
         }
     }

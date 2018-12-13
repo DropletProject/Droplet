@@ -1,6 +1,9 @@
-﻿using Droplet.Discovery.Consul;
+﻿using Consul;
+using Droplet.Discovery;
+using Droplet.Discovery.Consul;
 using Grpc.Core;
 using Helloworld;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,14 +31,16 @@ namespace Server
             var port = int.Parse(portStr);
             string serviceHost = GetIpAddress("192.168");
 
-            var consulClient = ConsulClientFactory.Create(new ConsulDiscoveryConfiguration() { Address = consulAddress });
-            var serviceRegistrar = new ConsulServiceRegistrar(consulClient);
+            var services = new ServiceCollection();
+            services.AddConsulDiscovery(consulAddress);
+
+            var provider = services.BuildServiceProvider();
+            var serviceRegistrar = provider.GetService<IServiceRegistrar>();
             var server = new Grpc.Core.Server
             {
                 Services = { Greeter.BindService(new GreeterImpl()) },
                 Ports = { new ServerPort(serviceHost, port, ServerCredentials.Insecure) }
             };
-
 
             server.Start();
             var info = serviceRegistrar.RegisterServiceAsync(Greeter.Descriptor.FullName,"v1.0", serviceHost, port).Result;

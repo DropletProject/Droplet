@@ -26,13 +26,14 @@ namespace Droplet.ServiceProxy.Grpc
         public async Task<TService> CreateAsync<TService>(string serviceName) where TService : ClientBase
         {
             var serviceInfo = await _serviceDiscovery.GetServiceAsync(_serviceSelector, serviceName);
-            var callInvoker = new ServiceProxyCallInvoker(CreateChannel(serviceInfo));
-
             if (_interceptors != null && _interceptors.Count() > 0)
             {
-                callInvoker.Intercept(_interceptors.ToArray());
+                return (TService)Activator.CreateInstance(typeof(TService), CreateChannel(serviceInfo).Intercept(_interceptors.ToArray()));
             }
-            return (TService)Activator.CreateInstance(typeof(TService), callInvoker);
+            else
+            {
+                return (TService)Activator.CreateInstance(typeof(TService), CreateChannel(serviceInfo));
+            }
         }
 
         private Channel CreateChannel(ServiceInformation serviceInfo)

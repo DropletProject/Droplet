@@ -9,32 +9,27 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddConsulDiscovery(this IServiceCollection services, Action<ConsulDiscoveryConfiguration> action)
+        public static IServiceCollection AddConsulDiscovery(this IServiceCollection services,Uri address, Action<ConsulDiscoveryBuilder> action = null)
         {
-            var configuration = new ConsulDiscoveryConfiguration();
-            action.Invoke(configuration);
-            if(configuration.Address == null)
+            var builder = new ConsulDiscoveryBuilder(address);
+            action?.Invoke(builder);
+            if (builder.Address == null)
             {
-                throw new ArgumentNullException(nameof(configuration.Address));
+                throw new ArgumentNullException(nameof(builder.Address));
             }
-            if(configuration.CacheRefreshInterval < 5)
+            if (builder.CacheRefreshInterval < 5)
             {
-                throw new ArgumentOutOfRangeException(nameof(configuration.CacheRefreshInterval), "Must be greater than or equal to 5");
-            }
-
-            switch (configuration.ServiceSelectorType)
-            {
-                case ServiceSelectorType.Polling:
-                    services.AddSingleton<IServiceSelector, PollingServiceSelector>();
-                    break;
+                throw new ArgumentOutOfRangeException(nameof(builder.CacheRefreshInterval), "Must be greater than or equal to 5");
             }
 
-            services.AddSingleton<IServiceRegistrar>(provider=> {
-                return new ConsulServiceRegistrar(ConsulClientFactory.Create(configuration));
+            services.AddSingleton(typeof(IServiceSelector),builder.ServiceSelectorType);
+
+            services.AddSingleton<IServiceRegistrar>(provider => {
+                return new ConsulServiceRegistrar(ConsulClientFactory.Create(builder.Address));
             });
 
             services.AddSingleton<IServiceDiscovery>(provider => {
-                return new ConsulServiceDiscovery(ConsulClientFactory.Create(configuration), configuration);
+                return new ConsulServiceDiscovery(ConsulClientFactory.Create(builder.Address), builder.CacheAble, builder.CacheRefreshInterval);
             });
 
             return services;

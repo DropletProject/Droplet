@@ -16,11 +16,11 @@ namespace Droplet.Discovery.Consul
         private readonly bool _useCache;
         private readonly int _cacheRefreshInterval;
 
-        public ConsulServiceDiscovery(IConsulClient consul, ConsulDiscoveryConfiguration configuration)
+        public ConsulServiceDiscovery(IConsulClient consul, bool useCache, int cacheRefreshInterval)
         {
             _consul = consul;
-            _useCache = configuration.UseCache;
-            _cacheRefreshInterval = configuration.CacheRefreshInterval;
+            _useCache = useCache;
+            _cacheRefreshInterval = cacheRefreshInterval;
         }
 
         public async Task<IEnumerable<ServiceInformation>> GetServicesAsync(string name, string version = "")
@@ -68,7 +68,7 @@ namespace Droplet.Discovery.Consul
                 }
             }
             var services = await GetServicesFromConsulAsync(name,version);
-            var newCache = new ServiceCache(name, DateTime.Now.AddMinutes(1), services);
+            var newCache = new ServiceCache(name, DateTime.Now.AddSeconds(_cacheRefreshInterval), services);
             _serviceCache.AddOrUpdate(name, newCache, (key, oldCache) => { return newCache; });
             return services;
         }
