@@ -10,7 +10,7 @@ namespace Droplet.AutoDI
         {
             foreach (var aType in @this)
             {
-                if (aType.IsGenericType)
+                if (aType.IsGenericType && IsAllParameterGeneric(aType.GenericTypeArguments))
                 {
                     yield return aType.GetGenericTypeDefinition();
                 }
@@ -19,6 +19,17 @@ namespace Droplet.AutoDI
                     yield return aType;
                 }
             }
+        }
+
+        private static bool IsAllParameterGeneric(Type[] types)
+        {
+            foreach (var aType in types)
+            {
+                if (!aType.IsGenericParameter)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

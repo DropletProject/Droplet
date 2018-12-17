@@ -16,7 +16,7 @@ namespace Droplet.AutoDI.Dotnet.Test.ServiceSelector
             var selector = new AllServiceSelector();
             var types = selector.SelectServices(typeof(TestThirdClass));
 
-            Assert.AreEqual(5, types.Count());
+            Assert.AreEqual(4, types.Count());
         }
 
         public abstract class AbsClass { }

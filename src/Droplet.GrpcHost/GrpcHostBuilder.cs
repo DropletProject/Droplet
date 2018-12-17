@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using Droplet.Discovery;
+using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,70 +21,92 @@ namespace Droplet.GrpcHost
 
     public class GrpcHostBuilder
     {
-        public string EnvVarName { get; set; }
-        public string ConfigName { get; set; }
-        public string ConfigDir { get; set; }
+        public string serviceName { get; set; }
+        public string envVarName { get; set; }
+        public string configName { get; set; }
+        public string configDir { get; set; }
 
-        public Func<IServiceProvider, ServerServiceDefinition> GrpcServer { get; set; }
+        public Func<IServiceProvider, ServerServiceDefinition> grpcServer { get; set; }
 
-        public Type StartupType { get; set; }
+        public Type startupType { get; set; }
 
-        public string IpAddress { get; set; }
-        public int Port { get; set; }
+        public string ipAddress { get; set; }
+        public int port { get; set; }
 
-        public IServiceProvider Container { get; set; }
+        public IServiceProvider container { get; set; }
+        public string consulAddrSection { get; set; }
 
         public GrpcHostBuilder()
         {
-            EnvVarName = "ASPNETCORE_ENVIRONMENT";
-            ConfigName = "appsettings";
-            ConfigDir = "./configs";
+            envVarName = "ASPNETCORE_ENVIRONMENT";
+            configName = "appsettings";
+            configDir = "./configs";
+            consulAddrSection = "consulAddr";
         }
 
-        public GrpcHostBuilder UseConfig(string configDir = "", string configName = "")
+        public GrpcHostBuilder ServiceName(string name)
+        {
+            serviceName = name;
+
+            return this;
+        }
+
+        public GrpcHostBuilder Config(string configDir = "", string configName = "")
         {
             if(!string.IsNullOrEmpty(configDir))
-                ConfigDir = configDir;
+                this.configDir = configDir;
 
             if (!string.IsNullOrEmpty(configName))
-                ConfigName = configName;
+                this.configName = configName;
 
             return this;
         }
 
-        public GrpcHostBuilder UserHost(string ip = "", int port = 0)
+        public GrpcHostBuilder Host(string ip = "", int port = 0)
         {
-            IpAddress = ip;
-            Port = port;
+            ipAddress = ip;
+            this.port = port;
 
             return this;
         }
 
-        public GrpcHostBuilder UseGrpcServer(Func<IServiceProvider, ServerServiceDefinition> serverServiceDefinition)
+        public GrpcHostBuilder GrpcServer(Func<IServiceProvider, ServerServiceDefinition> serverServiceDefinition)
         {
-            GrpcServer = serverServiceDefinition;
+            grpcServer = serverServiceDefinition;
+
+            return this;
+        }
+
+        public GrpcHostBuilder ConsulAddrSetion(string consulAddrSetion)
+        {
+            consulAddrSection = consulAddrSetion;
 
             return this;
         }
 
         public GrpcHostBuilder Startup<T>()
         {
-            StartupType = typeof(T);
+            startupType = typeof(T);
 
             return this;
         }
 
         public void Build()
         {
-            var env = Environment.GetEnvironmentVariable(EnvVarName);
+            CheckParameter();
+
+            var env = Environment.GetEnvironmentVariable(envVarName);
             var config = new ConfigurationBuilder()
-                .AddJsonFile($"{ConfigDir}/{ConfigName}.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"{ConfigDir}/{ConfigName}.{env}.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"{configDir}/{configName}.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"{configDir}/{configName}.{env}.json", optional: true, reloadOnChange: true)
                 .Build();
             var container = new ServiceCollection();
             container.AddSingleton<IConfiguration>(config);
+            container.AddConsulDiscovery(new Uri(config.GetSection(consulAddrSection).Value), cfg => {
+                cfg.UseCache(10);
+            });
 
-            InitStartup(container);
+            InitStartup(container, config);
             var sp = container.BuildServiceProvider();
 
             var complete = new ManualResetEventSlim(false);
@@ -96,19 +119,21 @@ namespace Droplet.GrpcHost
                     complete.Set();
                 };
 
-                if (string.IsNullOrEmpty(IpAddress))
-                    IpAddress = GetLocalIp();
+                if (string.IsNullOrEmpty(ipAddress))
+                    ipAddress = GetLocalIp();
 
-                if (Port == 0)
-                    Port = GetAvailablePort();
+                if (port == 0)
+                    port = GetAvailablePort();
 
                 Server server = new Server
                 {
-                    Services = { GrpcServer(sp) },
-                    Ports = { new ServerPort(GetLocalIp(), Port, ServerCredentials.Insecure) }
+                    Services = { grpcServer(sp) },
+                    Ports = { new ServerPort(ipAddress, port, ServerCredentials.Insecure) }
                 };
+
+                sp.GetService<IServiceRegistrar>().RegisterServiceAsync(serviceName, "", ipAddress, port).Wait();
                 server.Start();
-                Console.WriteLine($"GrpcServer is listen on { IpAddress }:{ Port}");
+                Console.WriteLine($"GrpcServer is listen on { ipAddress }:{ port}");
                 complete.Wait();
             }
             catch (Exception ex)
@@ -118,12 +143,18 @@ namespace Droplet.GrpcHost
             Environment.Exit(0);
         }
 
-        private void InitStartup(IServiceCollection services)
+        private void CheckParameter()
         {
-            if (StartupType == null)
+            if (string.IsNullOrEmpty(serviceName))
+                throw new ArgumentException("parameter can not be empty", nameof(serviceName));
+        }
+
+        private void InitStartup(IServiceCollection services, IConfiguration configuration)
+        {
+            if (startupType == null)
                 return;
 
-            dynamic startup = Activator.CreateInstance(StartupType);
+            dynamic startup = Activator.CreateInstance(startupType, configuration);
             startup.ConfigureServices(services);
         }
 
