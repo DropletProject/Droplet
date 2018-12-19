@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Grpc.Core.Server;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Droplet.GrpcHost
 {
@@ -140,8 +141,21 @@ namespace Droplet.GrpcHost
             if (startupType == null)
                 return;
 
-            dynamic startup = Activator.CreateInstance(startupType, configuration);
-            startup.ConfigureServices(services);
+            var oneParaConstr = startupType.GetConstructors().FirstOrDefault(p=>p.GetParameters().Count() == 1);
+            if (oneParaConstr != null)
+            {
+                dynamic startup = oneParaConstr.Invoke(new object[]{ configuration });
+                startup.ConfigureServices(services);
+                return;
+            }
+
+            var defaultConstr = startupType.GetConstructors().FirstOrDefault(p => p.GetParameters().Count() == 0);
+            if (defaultConstr != null)
+            {
+                dynamic startup = defaultConstr.Invoke(null);
+                startup.ConfigureServices(services);
+                return;
+            }
         }
     }
 }
