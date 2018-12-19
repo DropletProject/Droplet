@@ -2,12 +2,14 @@
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using static Grpc.Core.Server;
+using Microsoft.Extensions.Logging;
 
 namespace Droplet.GrpcHost
 {
@@ -96,51 +98,35 @@ namespace Droplet.GrpcHost
             CheckParameter();
 
             var env = Environment.GetEnvironmentVariable(envVarName);
-            var config = new ConfigurationBuilder()
-                .AddJsonFile($"{configDir}/{configName}.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"{configDir}/{configName}.{env}.json", optional: true, reloadOnChange: true)
+
+            var host = new HostBuilder()
+                .ConfigureAppConfiguration(cfg => {
+                    cfg
+                        .AddJsonFile($"{configDir}/{configName}.json", optional: true, reloadOnChange: true)
+                        .AddJsonFile($"{configDir}/{configName}.{env}.json", optional: true, reloadOnChange: true);
+                })
+                .ConfigureServices((ctx, srv) => {
+                    
+                    srv.AddConsulDiscovery(new Uri(ctx.Configuration.GetSection(consulAddrSection).Value), cfg => {
+                        cfg.UseCache(10);
+                    });
+                    InitStartup(srv, ctx.Configuration);
+                    InitGrpcServer(srv);
+                })
+                .ConfigureLogging((hostContext, configLogging) =>
+                {
+                    configLogging.AddConsole();
+                })
                 .Build();
-            var container = new ServiceCollection();
-            container.AddSingleton<IConfiguration>(config);
-            container.AddConsulDiscovery(new Uri(config.GetSection(consulAddrSection).Value), cfg => {
-                cfg.UseCache(10);
-            });
 
-            InitStartup(container, config);
-            var sp = container.BuildServiceProvider();
+            
+            host.Run();
+        }
 
-            var complete = new ManualResetEventSlim(false);
-
-            try
-            {
-                Console.CancelKeyPress += (sender, eventArgs) =>
-                {
-                    eventArgs.Cancel = true;
-                    complete.Set();
-                };
-
-                if (string.IsNullOrEmpty(ipAddress))
-                    ipAddress = GetLocalIp();
-
-                if (port == 0)
-                    port = GetAvailablePort();
-
-                Server server = new Server
-                {
-                    Services = { grpcServer(sp) },
-                    Ports = { new ServerPort(ipAddress, port, ServerCredentials.Insecure) }
-                };
-
-                sp.GetService<IServiceRegistrar>().RegisterServiceAsync(serviceName, "", ipAddress, port).Wait();
-                server.Start();
-                Console.WriteLine($"GrpcServer is listen on { ipAddress }:{ port}");
-                complete.Wait();
-            }
-            catch (Exception ex)
-            {
-                complete.Set();
-            }
-            Environment.Exit(0);
+        private void InitGrpcServer(IServiceCollection srv)
+        {
+            srv.AddSingleton<IGrpcHostOption>(new GrpcHostOption(serviceName, grpcServer, ipAddress, port));
+            srv.AddHostedService<GrpcHostService>();
         }
 
         private void CheckParameter()
@@ -156,28 +142,6 @@ namespace Droplet.GrpcHost
 
             dynamic startup = Activator.CreateInstance(startupType, configuration);
             startup.ConfigureServices(services);
-        }
-
-        private string GetLocalIp()
-        {
-            string localIP;
-            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
-            {
-                socket.Connect("8.8.8.8", 65530);
-                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
-                localIP = endPoint.Address.ToString();
-            }
-
-            return localIP;
-        }
-
-        private int GetAvailablePort()
-        {
-            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
-            l.Start();
-            int port = ((IPEndPoint)l.LocalEndpoint).Port;
-            l.Stop();
-            return port;
         }
     }
 }

@@ -21,13 +21,13 @@ namespace Client
         {
             var services = new ServiceCollection();
             services.AddConsulDiscovery(consulAddress, b => b.UseCache(5))
-                .AddGrpcServiceProxy(c => c.UseCallInterceptor<TestCallInterceptor>());
+                .AddGrpcServiceProxy();
 
             var provider = services.BuildServiceProvider();
           
             var proxy = provider.GetService<IServiceProxy>();
 
-            int total = 200000;
+            int total = 20000;
             var watch = Stopwatch.StartNew();
 
             //while (total > 0)
@@ -44,7 +44,7 @@ namespace Client
             //    }
             //    total--;
             //}
-
+            ss = proxy.CreateAsync<GreeterClient>(Greeter.Descriptor.FullName).Result;
             for (int index = 0; index < total; index++)
             {
                 SendMessage(proxy,index.ToString());
@@ -60,12 +60,15 @@ namespace Client
             Console.ReadKey();
         }
 
+        static GreeterClient ss;
+
         static void SendMessage(IServiceProxy proxy,string message)
         {
+            
             try
             {
-                var client = proxy.CreateAsync<GreeterClient>(Greeter.Descriptor.FullName).Result;
-                client.SayHello(new HelloRequest() { Name = message });
+                
+                ss.SayHello(new HelloRequest() { Name = message });
             }
             catch (Exception ex)
             {
