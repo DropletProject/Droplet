@@ -7,7 +7,7 @@ namespace Droplet.Discovery.Consul
 {
     public class VersionHelper
     {
-        public const string VERSION_PREFIX = "version-";
+        public const string VERSION_PREFIX = "v-";
 
         public static string GetVersionFromTags(IEnumerable<string> tags)
         {
