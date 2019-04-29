@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             var builder = new ConsulDiscoveryBuilder(address);
             action?.Invoke(builder);
+
             if (builder.Address == null)
             {
                 throw new ArgumentNullException(nameof(builder.Address));
@@ -22,14 +23,19 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentOutOfRangeException(nameof(builder.CacheRefreshInterval), "Must be greater than or equal to 5");
             }
 
-            services.AddSingleton(typeof(IServiceSelector),builder.ServiceSelectorType);
-
             services.AddSingleton<IServiceRegistrar>(provider => {
                 return new ConsulServiceRegistrar(ConsulClientFactory.Create(builder.Address));
             });
 
             services.AddSingleton<IServiceDiscovery>(provider => {
-                return new ConsulServiceDiscovery(ConsulClientFactory.Create(builder.Address), builder.CacheAble, builder.CacheRefreshInterval);
+                return new ConsulServiceDiscovery(ConsulClientFactory.Create(builder.Address));
+            });
+
+            services.AddSingleton(typeof(IServiceSelector), builder.ServiceSelectorType);
+
+            services.AddSingleton<IServicePool>(provider => {
+                var options = new ServicePoolOptions() { CacheRefreshInterval = builder.CacheRefreshInterval };
+                return new ServicePool(provider.GetService<IServiceDiscovery>(), provider.GetService<IServiceSelector>(), options);
             });
 
             return services;

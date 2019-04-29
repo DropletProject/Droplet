@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+<<<<<<< HEAD
+    <PackageReference Include="FakeItEasy" Version="4.9.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.2.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.2.1" />
+=======
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
+>>>>>>> 79944c487249018042a70c61cb6a57f0390b9678
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Droplet.AutoMapper\Droplet.AutoMapper.csproj" />
+  </ItemGroup>
+
+</Project>

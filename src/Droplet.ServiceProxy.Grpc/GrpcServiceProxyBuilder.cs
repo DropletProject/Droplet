@@ -15,6 +15,8 @@ namespace Droplet.ServiceProxy.Grpc
         /// </summary>
         public List<Type> CallInterceptorTypes { get; private set; } = new List<Type>();
 
+        public IDictionary<Type, string> ClientDic { get; private set; } = new Dictionary<Type, string>();
+
         public GrpcServiceProxyBuilder UseCallInterceptors(params Type[] callInterceptorTypes)
         {
             CallInterceptorTypes = callInterceptorTypes.ToList();
@@ -24,6 +26,12 @@ namespace Droplet.ServiceProxy.Grpc
         public GrpcServiceProxyBuilder UseCallInterceptor<TCallInterceptor>() where TCallInterceptor: CallInterceptor
         {
             CallInterceptorTypes.Add(typeof(TCallInterceptor));
+            return this;
+        }
+
+        public GrpcServiceProxyBuilder AddGrpcClient<TService>(string serviceName)
+        {
+            ClientDic.Add(typeof(TService), serviceName);
             return this;
         }
     }

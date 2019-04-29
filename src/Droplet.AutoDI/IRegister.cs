@@ -7,6 +7,6 @@ namespace Droplet.AutoDI
 {
     public interface IRegister
     {
-        void Register(Type component, Type service);
+        void Register(Type component, Type service, ComponentAttribute attr = null);
     }
 }

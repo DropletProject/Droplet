@@ -16,14 +16,14 @@ namespace Droplet.AutoDI
             _register = register;
         }
 
-        public void RegisterComponent(Type component)
+        public void RegisterComponent(Type component, ComponentAttribute attr = null)
         {
-            var selectors = GetServiceSelectors(component);
+            var selectors = GetServiceSelectors(component, attr);
             var services = GetServices(component, selectors);
 
             foreach (var aService in services)
             {
-                _register.Register(component, aService);
+                _register.Register(component, aService, attr);
             }
         }
 
@@ -39,9 +39,10 @@ namespace Droplet.AutoDI
             }
         }
 
-        private List<IServiceSelector> GetServiceSelectors(Type component)
+        private List<IServiceSelector> GetServiceSelectors(Type component, ComponentAttribute attr)
         {
-            var attr = component.GetComponentAttr();
+            if(attr == null)
+                attr = component.GetComponentAttr();
 
             var serviceSelector = new List<IServiceSelector>();
 

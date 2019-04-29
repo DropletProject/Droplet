@@ -12,7 +12,7 @@ namespace Droplet.AutoDI.Test
         public void TestRegisterComponent_First()
         {
             var register = A.Fake<IRegister>();
-            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._, null)).Invokes((ctx) =>
              {
                  if ((Type)ctx.Arguments[0] != typeof(TestFirstClass))
                      Assert.Fail("component type is not correct");
@@ -29,7 +29,7 @@ namespace Droplet.AutoDI.Test
         public void TestRegisterComponent_SelfAndPart()
         {
             var register = A.Fake<IRegister>();
-            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._, null)).Invokes((ctx) =>
             {
                 if ((Type)ctx.Arguments[0] != typeof(TestSelfAndPartitionClass))
                     Assert.Fail("component type is not correct");
@@ -47,7 +47,7 @@ namespace Droplet.AutoDI.Test
         public void TestRegisterComponent_GenericType()
         {
             var register = A.Fake<IRegister>();
-            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._, null)).Invokes((ctx) =>
             {
                 if ((Type)ctx.Arguments[0] != typeof(TestGenericType<>))
                     Assert.Fail("component type is not correct");
@@ -65,7 +65,7 @@ namespace Droplet.AutoDI.Test
         public void TestRegisterComponent_GenericType_Concret()
         {
             var register = A.Fake<IRegister>();
-            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._, null)).Invokes((ctx) =>
             {
                 if ((Type)ctx.Arguments[0] != typeof(ConcretGenericType))
                     Assert.Fail("component type is not correct");
@@ -84,7 +84,7 @@ namespace Droplet.AutoDI.Test
         {
             var register = A.Fake<IRegister>();
             var callCount = 0;
-            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._, null)).Invokes((ctx) =>
             {
                 if ((Type)ctx.Arguments[0] != typeof(TestAllClass))
                     Assert.Fail("component type is not correct");
@@ -103,7 +103,7 @@ namespace Droplet.AutoDI.Test
         {
             var register = A.Fake<IRegister>();
             var callCount = 0;
-            A.CallTo(() => register.Register(A<Type>._, A<Type>._)).Invokes((ctx) =>
+            A.CallTo(() => register.Register(A<Type>._, A<Type>._, null)).Invokes((ctx) =>
             {
                 callCount++;
             });
@@ -111,7 +111,7 @@ namespace Droplet.AutoDI.Test
             var componentRegistrar = new ComponentRegistrar(register);
             componentRegistrar.RegisterAssembly(Assembly.GetExecutingAssembly());
 
-            Assert.AreEqual(7, callCount);
+            Assert.AreEqual(15, callCount);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using Droplet.Discovery;
 using Droplet.ServiceProxy.Grpc;
+using Droplet.ServiceProxy.Grpc.Internal;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,7 +22,13 @@ namespace Microsoft.Extensions.DependencyInjection
                     services.AddSingleton(baseType, type);
                 }
             }
+            services.AddSingleton<IServiceNameSelector, ServiceNameSelector>(p=> {
+                return new ServiceNameSelector(builder.ClientDic);
+            });
             services.AddSingleton<IServiceProxy, ServiceProxy>();
+            services.AddTransient(typeof(IServiceProxy<>),typeof(ServiceProxy<>));
+
+
             return services;
         }
     }

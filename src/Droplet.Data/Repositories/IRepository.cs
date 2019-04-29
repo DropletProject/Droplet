@@ -10,12 +10,8 @@ using System.Threading.Tasks;
 
 namespace Droplet.Data.Repositories
 {
-    public interface IRepository
-    {
 
-    }
-
-    public interface IRepository<TEntity>: IRepository where TEntity : class, IEntity
+    public interface IRepository<TEntity> where TEntity : class, IEntity
     {
         /// <summary>
         /// 读取列表
@@ -27,7 +23,7 @@ namespace Droplet.Data.Repositories
         /// 异步读取列表
         /// </summary>
         /// <returns></returns>
-        Task<IQueryable<TEntity>> GetAllAsync();
+        Task<List<TEntity>> GetAllAsync();
 
         /// <summary>
         /// 根据条件读取列表
@@ -41,7 +37,7 @@ namespace Droplet.Data.Repositories
         /// </summary>
         /// <param name="predicate">The predicate.</param>
         /// <returns></returns>
-        Task<IQueryable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<List<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate);
 
         /// <summary>
         /// 插入一个实体
@@ -104,6 +100,14 @@ namespace Droplet.Data.Repositories
         /// </summary>
         /// <returns></returns>
         Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
+
+        /// <summary>
+        /// 执行Cmd
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        Task ExecuteCmd(string sql, params object[] parameters);
     }
 
 

@@ -7,7 +7,12 @@ using System.Text;
 
 namespace Droplet.Data.Entities
 {
-    public abstract class AggregateRoot : Entity<int>
+    public interface IAggregateRoot
+    {
+        ICollection<INotification> DomainEvents { get; }
+    }
+
+    public abstract class AggregateRoot<TPrimaryKey> : Entity<TPrimaryKey>, IAggregateRoot
     {
         public AggregateRoot()
         {
@@ -16,6 +21,10 @@ namespace Droplet.Data.Entities
 
         [NotMapped]
         public ICollection<INotification> DomainEvents { get; }
+    }
+
+    public abstract class AggregateRoot : AggregateRoot<int>
+    {
 
     }
 }

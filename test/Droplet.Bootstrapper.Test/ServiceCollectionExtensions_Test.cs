@@ -12,7 +12,10 @@ namespace Droplet.Bootstrapper.Test
         public void TestBootDroplet()
         {
             var services = new ServiceCollection();
-            services.BootDroplet(new BootOption { EntryAssembly = typeof(ServiceCollectionExtensions_Test).Assembly });
+            services
+                .BootDroplet(new BootOption { EntryAssembly = typeof(ServiceCollectionExtensions_Test).Assembly })
+                .UseAutoDI();
+
             var sp = services.BuildServiceProvider();
 
             var moduleFinder = sp.GetService<IModuleFinder>();

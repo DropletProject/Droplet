@@ -32,14 +32,14 @@ namespace Droplet.Data.Repositories
 
         public abstract IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate);
 
-        public virtual Task<IQueryable<TEntity>> GetAllAsync()
+        public virtual Task<List<TEntity>> GetAllAsync()
         {
-            return Task.FromResult(GetAll());
+            return Task.FromResult(GetAll().ToList());
         }
 
-        public virtual Task<IQueryable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate)
+        public virtual Task<List<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return Task.FromResult(GetAll(predicate));
+            return Task.FromResult(GetAll(predicate).ToList());
         }
 
         public abstract void Insert(TEntity entity);
@@ -57,6 +57,8 @@ namespace Droplet.Data.Repositories
             Update(entity);
             return Task.FromResult(0);
         }
+
+        public abstract Task ExecuteCmd(string sql, params object[] parameters);
     }
 
 }

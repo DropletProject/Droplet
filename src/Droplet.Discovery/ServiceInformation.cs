@@ -30,5 +30,7 @@ namespace Droplet.Discovery
         /// 
         /// </summary>
         public IEnumerable<string> Tags { get; set; }
+
+        public string Uri => $"http://{Host}:{Port}";
     }
 }

@@ -28,6 +28,16 @@ namespace Droplet.Data.EntityFrameworkCore
             return Table.AsQueryable();
         }
 
+        public override Task<List<TEntity>> GetAllAsync()
+        {
+            return Table.AsQueryable().ToListAsync();
+        }
+
+        public override Task<List<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return Table.AsQueryable().Where(predicate).ToListAsync();
+        }
+
         public override IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
             return GetAll().Where(predicate);
@@ -80,6 +90,11 @@ namespace Droplet.Data.EntityFrameworkCore
         {
             return await Table.FirstOrDefaultAsync(predicate);
         }
+
+        public override async Task ExecuteCmd(string sql, params object[] parameters)
+        {
+            await _unitOfWork.Context.Database.ExecuteSqlCommandAsync(sql, parameters);
+        }
     }
 
     public class EntityFrameworkCoreRepository<TEntity, TPrimaryKey, TContext>
@@ -103,8 +118,8 @@ namespace Droplet.Data.EntityFrameworkCore
 
         public virtual TEntity Get(TPrimaryKey id)
         {
-            var entity = GetAll().FirstOrDefault(CreateEqualityExpressionForId(id));
-            if(entity == null)
+            var entity = Table.Find(id);
+            if (entity == null)
             {
                 throw new ArgumentException($"{typeof(TEntity).Name}不存在Id={id}的记录");
             }
@@ -113,7 +128,12 @@ namespace Droplet.Data.EntityFrameworkCore
 
         public virtual async Task<TEntity> GetAsync(TPrimaryKey id)
         {
-            return await Table.FindAsync(id);
+            var entity = await Table.FindAsync(id);
+            if (entity == null)
+            {
+                throw new ArgumentException($"{typeof(TEntity).Name}不存在Id={id}的记录");
+            }
+            return entity;
         }
 
         public override async Task InsertAsync(TEntity entity)

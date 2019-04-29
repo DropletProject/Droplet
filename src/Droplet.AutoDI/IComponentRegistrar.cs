@@ -7,7 +7,7 @@ namespace Droplet.AutoDI
 {
     public interface IComponentRegistrar
     {
-        void RegisterComponent(Type component);
+        void RegisterComponent(Type component, ComponentAttribute attr);
         void RegisterAssembly(params Assembly[] assemblies);
     }
 }

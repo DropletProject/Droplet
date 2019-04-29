@@ -1,17 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Description>Help project to integrate Droplet easily</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="5.1.0" />
-    <PackageReference Include="Scrutor" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Droplet.AutoDI.Dotnet\Droplet.AutoDI.Dotnet.csproj" />
-    <ProjectReference Include="..\Droplet.Data.EntityFrameworkCore\Droplet.Data.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Droplet.Module\Droplet.Module.csproj" />
   </ItemGroup>
 

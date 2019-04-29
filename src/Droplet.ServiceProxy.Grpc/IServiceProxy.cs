@@ -10,5 +10,11 @@ namespace Droplet.ServiceProxy.Grpc
         Task<TService> CreateAsync<TService>(string serviceName) where TService : ClientBase;
     }
 
-  
+    public interface IServiceProxy<TService> where TService : ClientBase
+    {
+        TService Service { get; }
+    }
+
+
+
 }

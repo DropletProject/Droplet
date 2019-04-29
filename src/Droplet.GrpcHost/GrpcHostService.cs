@@ -9,6 +9,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Grpc.Core.Interceptors;
+using System.Linq;
+using Droplet.GrpcHost.Interceptors;
+using static Grpc.Core.Server;
 
 namespace Droplet.GrpcHost
 {
@@ -16,6 +20,8 @@ namespace Droplet.GrpcHost
     {
         private readonly IGrpcHostOption _grpcHostOption;
         private readonly IServiceProvider _serviceProvider;
+
+        private ServiceInformation _serviceInformation;
 
         public GrpcHostService(IGrpcHostOption grpcHostOption, IServiceProvider serviceProvider)
         {
@@ -25,41 +31,56 @@ namespace Droplet.GrpcHost
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var interceptors = _serviceProvider.GetService<IEnumerable<ServerInterceptor>>();
             Server server = new Server
             {
-                Services = { _grpcHostOption.GrpcServer(_serviceProvider) },
                 Ports = { new ServerPort(_grpcHostOption.IpAddress, _grpcHostOption.Port, ServerCredentials.Insecure) }
             };
-
+            foreach (var grpcserver in _grpcHostOption.GrpcServers)
+            {
+                server.Services.Add(grpcserver.Invoke(_serviceProvider).Intercept(interceptors.ToArray()));
+            }
             server.Start();
-            await _serviceProvider.GetService<IServiceRegistrar>().RegisterServiceAsync(_grpcHostOption.ServiceName, "", _grpcHostOption.IpAddress, _grpcHostOption.Port);
+            _serviceInformation = await _serviceProvider.GetService<IServiceRegistrar>().RegisterServiceAsync(_grpcHostOption.ServiceName, _grpcHostOption.ServiceVersion, _grpcHostOption.IpAddress, _grpcHostOption.Port);
             Console.WriteLine($"GrpcServer is listen on { _grpcHostOption.IpAddress }:{ _grpcHostOption.Port}");
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            if(_serviceInformation != null)
+            {
+                await _serviceProvider.GetService<IServiceRegistrar>().DeregisterServiceAsync(_serviceInformation.Id);
+            }
         }
     }
 
     public interface IGrpcHostOption
     {
         string ServiceName { get; set; }
+        string ServiceVersion { get; set; }
         string IpAddress { get; set; }
         int Port { get; set; }
-        Func<IServiceProvider, ServerServiceDefinition> GrpcServer { get; set; }
+
+        List<Func<IServiceProvider, ServerServiceDefinition>> GrpcServers { get; }
     }
 
-    public class GrpcHostOption : IGrpcHostOption
+    internal class GrpcHostOption : IGrpcHostOption
     {
         public string ServiceName { get; set; }
+        public string ServiceVersion { get; set; }
         public string IpAddress { get; set; }
         public int Port { get; set; }
-        public Func<IServiceProvider, ServerServiceDefinition> GrpcServer { get; set; }
+        public List<Func<IServiceProvider, ServerServiceDefinition>> GrpcServers { get;  }
 
-        public GrpcHostOption(string serviceName, Func<IServiceProvider, ServerServiceDefinition> grpcServer, string ipAddress = "", int port = 0)
+        public GrpcHostOption()
+        {
+            GrpcServers = new List<Func<IServiceProvider, ServerServiceDefinition>>();
+        }
+
+        public GrpcHostOption(string serviceName, List<Func<IServiceProvider, ServerServiceDefinition>> grpcServers, string ipAddress = "", int port = 0,string version = ""):this()
         {
             ServiceName = serviceName;
+            ServiceVersion = version;
             if (string.IsNullOrEmpty(ipAddress))
                 ipAddress = GetLocalIp();
 
@@ -68,7 +89,7 @@ namespace Droplet.GrpcHost
 
             IpAddress = ipAddress;
             Port = port;
-            GrpcServer = grpcServer;
+            GrpcServers = grpcServers;
         }
 
         private string GetLocalIp()

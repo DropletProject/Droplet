@@ -1,3 +1,4 @@
+using Droplet.Data.Events;
 using Droplet.Data.Uow;
 using MediatR;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,6 +15,7 @@ namespace Droplet.Data.EntityFrameworkCore.Test
     {
         static TestDbContext _context;
         static EntityFrameworkCoreUnitOfWork<TestDbContext> _unitOfWork;
+        static Mock<IMediator> _mediator;
         static EntityFrameworkCoreRepository_Test()
         {
             var testWithIds = new List<TestWithId>
@@ -28,8 +30,8 @@ namespace Droplet.Data.EntityFrameworkCore.Test
             _context = new TestDbContext();
             _context.TestWithIds.AddRange(testWithIds);
             _context.SaveChanges();
-            var mediator = new Mock<IMediator>();
-            _unitOfWork = new EntityFrameworkCoreUnitOfWork<TestDbContext>(_context, mediator.Object);
+            _mediator = new Mock<IMediator>();
+            _unitOfWork = new EntityFrameworkCoreUnitOfWork<TestDbContext>(_context, _mediator.Object);
         }
 
 
@@ -120,12 +122,39 @@ namespace Droplet.Data.EntityFrameworkCore.Test
                 var test = new Test("ShouldPublishDomainEvents_InsertAndCompleteTest");
                 repository.Insert(test);
                 unitOfWork.Complete();
-                mediator.Verify(s => s.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()), Times.Once);
+                mediator.Verify(s => s.Publish<INotification>(It.IsAny<CreateNewTestEvent>(), It.IsAny<CancellationToken>()), Times.Once);
                 Assert.AreEqual(test.DomainEvents.Count, 0);
             }
         }
 
-       
+        [TestMethod]
+        public void ShouldPublishChangeEntityEvent_UpdateAndCompleteTest()
+        {
+            using (var context = new TestDbContext())
+            {
+                var mediator = new Mock<IMediator>();
+                var unitOfWork = new EntityFrameworkCoreUnitOfWork<TestDbContext>(context, mediator.Object);
+                var repository = new EntityFrameworkCoreRepository<TestChangeEvent, string, TestDbContext>(unitOfWork);
+
+                var test = new TestChangeEvent() { Id = "ShouldPublishUpdateEntityEvent_UpdateAndCompleteTest" };
+                repository.Insert(test);
+                unitOfWork.Complete();
+                mediator.Verify(s => s.Publish<INotification>(It.IsAny<CreatedEntityEvent<TestChangeEvent>>(), It.IsAny<CancellationToken>()), Times.Once);
+
+                var test2 = repository.Get(test.Id);
+                test2.Name = "121212";
+                repository.Update(test2);
+                unitOfWork.Complete();
+                mediator.Verify(s => s.Publish<INotification>(It.IsAny<UpdatedEntityEvent<TestChangeEvent>>(), It.IsAny<CancellationToken>()), Times.Once);
+
+                repository.Delete(test.Id);
+                unitOfWork.Complete();
+                mediator.Verify(s => s.Publish<INotification>(It.IsAny<DeletedEntityEvent<TestChangeEvent>>(), It.IsAny<CancellationToken>()), Times.Once);
+
+            }
+        }
+
+
 
     }
 

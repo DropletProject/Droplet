@@ -11,8 +11,8 @@ namespace Droplet.Discovery.Consul
 
         public static string GetVersionFromTags(IEnumerable<string> tags)
         {
-            return tags
-                ?.FirstOrDefault(x => x.StartsWith(VERSION_PREFIX, StringComparison.Ordinal))
+            return tags?
+                .FirstOrDefault(x => x.StartsWith(VERSION_PREFIX, StringComparison.Ordinal))?
                 .Replace(VERSION_PREFIX, "");
         }
 

@@ -27,7 +27,7 @@ namespace Droplet.Data.Paging
             PageIndex = pageIndex;
             PageSize = pageSize;
             OrderBy = orderby;
-            IsDesc = IsDesc;
+            IsDesc = isDesc;
         }
         /// <summary>
         /// 第几页 从1开始

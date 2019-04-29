@@ -1,7 +1,9 @@
 ﻿using Droplet.Data.Entities;
+using Droplet.Data.Events;
 using Droplet.Data.Uow;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
@@ -37,15 +39,24 @@ namespace Droplet.Data.EntityFrameworkCore
             _dbContextTransaction = Context.Database.BeginTransaction(isolationLevel);
         }
 
+
         private async Task PublishDomainEventsAsync()
         {
-            var domainEntities = Context.ChangeTracker
-                .Entries<AggregateRoot>()
-                .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any());
+            var domainEntities = Context.ChangeTracker.Entries();
 
-            var domainEvents = domainEntities
-                .SelectMany(x => x.Entity.DomainEvents)
-                .ToList();
+            var domainEvents = new List<INotification>();
+
+            foreach (var domainEntity in domainEntities)
+            {
+                if(domainEntity.Entity is IAggregateRoot aggregateRoot)
+                {
+                    if(aggregateRoot.DomainEvents != null && aggregateRoot.DomainEvents.Any())
+                    {
+                        domainEvents.AddRange(aggregateRoot.DomainEvents);
+                        aggregateRoot.DomainEvents.Clear();
+                    }
+                }
+            }
 
             CancellationToken cancellationToken = new CancellationToken();
             var tasks = domainEvents
@@ -55,8 +66,14 @@ namespace Droplet.Data.EntityFrameworkCore
 
             await Task.WhenAll(tasks);
 
-            domainEntities.ToList()
-                .ForEach(entity => entity.Entity.DomainEvents.Clear());
+        }
+
+        private INotification CreateNotification(Type genericEventType, object entity)
+        {
+            var entityType = entity.GetType();
+            var eventType = genericEventType.MakeGenericType(entityType);
+
+            return (INotification)Activator.CreateInstance(eventType, new[] { entity });
         }
 
         public void Complete()

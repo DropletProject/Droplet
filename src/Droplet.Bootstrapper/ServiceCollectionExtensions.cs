@@ -1,6 +1,4 @@
-﻿using Droplet.AutoDI;
-using Droplet.AutoDI.Dotnet;
-using Droplet.Module;
+﻿using Droplet.Module;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -28,16 +26,8 @@ namespace Droplet.Bootstrapper
             moduleManger.Init();
             @this.AddSingleton<IModuleFinder>(moduleManger);
             var registerAssembly = moduleManger.GetModuleAssemblies();
-            InitAutoDI(@this, registerAssembly.ToArray());
 
             return new DropletBuilder(@this, registerAssembly);
-        }
-
-        private static void InitAutoDI(IServiceCollection services, Assembly[] assemblys)
-        {
-            var dotnetRegister = new DotnetRegister(services);
-            var registrar = new ComponentRegistrar(dotnetRegister);
-            registrar.RegisterAssembly(assemblys);
         }
     }
 

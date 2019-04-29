@@ -14,13 +14,9 @@ namespace Droplet.Discovery.Consul
         public Uri Address { get; private set; }
 
         /// <summary>
-        /// Using Service Address Caching 
+        /// Cache refresh interval (s)
         /// </summary>
-        public bool CacheAble { get; private set; } = false;
-        /// <summary>
-        /// Cache refresh interval (ms)
-        /// </summary>
-        public int CacheRefreshInterval { get; private set; } = 10;
+        public int CacheRefreshInterval { get; private set; } = 5;
 
         /// <summary>
         /// Service selection
@@ -30,22 +26,49 @@ namespace Droplet.Discovery.Consul
 
         public ConsulDiscoveryBuilder(Uri address)
         {
-            Address = address;
+            Address = address ?? throw new ArgumentNullException(nameof(address));
         }
 
-        public ConsulDiscoveryBuilder UseCache(bool cacheAble = true)
-        {
-            CacheAble = cacheAble;
-            return this;
-        }
 
+        //public ConsulDiscoveryBuilder UsePool(int cacheRefreshInterval,Type serviceSelectorType)
+        //{
+        //    if(serviceSelectorType.IsAssignableFrom(typeof(IServiceSelector)))
+        //    {
+        //        throw new ArgumentException("serviceSelectorType must be implement IServiceSelector",nameof(serviceSelectorType));
+        //    }
+        //    if(cacheRefreshInterval < 5)
+        //    {
+        //        throw new ArgumentException("cacheRefreshInterval must be greater than 3", nameof(cacheRefreshInterval));
+        //    }
+        //    CacheRefreshInterval = cacheRefreshInterval;
+        //    ServiceSelectorType = serviceSelectorType;
+        //    PoolAble = true;
+        //    return this;
+        //}
+
+        //public ConsulDiscoveryBuilder UsePool<TServiceSelector>(int cacheRefreshInterval) where TServiceSelector : IServiceSelector
+        //{
+        //    return UsePool(cacheRefreshInterval, typeof(TServiceSelector));
+        //}
+
+        //public ConsulDiscoveryBuilder UsePool(int cacheRefreshInterval = 5) 
+        //{
+        //    return UsePool(cacheRefreshInterval, typeof(PollingServiceSelector));
+        //}
+
+
+        /// <summary>
+        /// UseCache
+        /// </summary>
+        /// <param name="cacheRefreshInterval">seconds</param>
+        /// <returns></returns>
         public ConsulDiscoveryBuilder UseCache(int cacheRefreshInterval)
         {
             CacheRefreshInterval = cacheRefreshInterval;
-            return UseCache(true);
+            return this;
         }
 
-        public ConsulDiscoveryBuilder UseServiceSelector<TServiceSelector>() where TServiceSelector: IServiceSelector
+        public ConsulDiscoveryBuilder UseServiceSelector<TServiceSelector>() where TServiceSelector : IServiceSelector
         {
             ServiceSelectorType = typeof(TServiceSelector);
             return this;

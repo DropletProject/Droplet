@@ -17,5 +17,38 @@ namespace Droplet.Utility.Data
             StartTime = startTime;
             EndTime = endTime;
         }
+
+        public bool Contains(DateTime dateTime, CompareOption compareOption = CompareOption.SemiClose)
+        {
+            if (compareOption == CompareOption.SemiClose && dateTime >= StartTime && dateTime < EndTime)
+            {
+                return true;
+            }
+
+            if (compareOption == CompareOption.SemiOpen && dateTime > StartTime && dateTime <= EndTime)
+            {
+                return true;
+            }
+
+            if (compareOption == CompareOption.OpenClose && dateTime >= StartTime && dateTime <= EndTime)
+            {
+                return true;
+            }
+
+            if (compareOption == CompareOption.SemiOpenClose && dateTime > StartTime && dateTime < EndTime)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    public enum CompareOption
+    {
+        SemiOpenClose,
+        SemiOpen,
+        SemiClose,
+        OpenClose
     }
 }

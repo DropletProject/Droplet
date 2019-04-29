@@ -1,16 +1,8 @@
-﻿using Droplet.Discovery;
-using Grpc.Core;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Grpc.Core;
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using static Grpc.Core.Server;
-using Microsoft.Extensions.Logging;
-using System.Linq;
+using Grpc.Core.Interceptors;
+using System.Collections.Generic;
+using Droplet.GrpcHost.Interceptors;
 
 namespace Droplet.GrpcHost
 {
@@ -24,138 +16,76 @@ namespace Droplet.GrpcHost
 
     public class GrpcHostBuilder
     {
-        public string serviceName { get; set; }
-        public string envVarName { get; set; }
-        public string configName { get; set; }
-        public string configDir { get; set; }
+        public string IpAddress { get; private set; }
+        public int Port { get; private set; }
 
-        public Func<IServiceProvider, ServerServiceDefinition> grpcServer { get; set; }
+        public string ConsulAddrSection { get; private set; } = "consulAddr";
+        public string ServiceName { get; private set; }
+        public string ServiceVersion { get; private set; }
 
-        public Type startupType { get; set; }
+        public string ConfigName { get; private set; } = "appsettings";
+        public string ConfigDir { get; private set; } = "./configs";
+        public int DefaultCode { get; private set; }
 
-        public string ipAddress { get; set; }
-        public int port { get; set; }
 
-        public IServiceProvider container { get; set; }
-        public string consulAddrSection { get; set; }
+        public List<Func<IServiceProvider, ServerServiceDefinition>> GrpcServers { get; }
+
+        public List<Type> InterceptorTypes { get; private set; } = new List<Type>();
+
+
+        internal GrpcHostOption Option { get; private set; }
 
         public GrpcHostBuilder()
         {
-            envVarName = "ASPNETCORE_ENVIRONMENT";
-            configName = "appsettings";
-            configDir = "./configs";
-            consulAddrSection = "consulAddr";
+            GrpcServers = new List<Func<IServiceProvider, ServerServiceDefinition>>();
         }
 
-        public GrpcHostBuilder ServiceName(string name)
+        public GrpcHostBuilder UseHost(string ipAddress, int port)
         {
-            serviceName = name;
-
+            IpAddress = ipAddress;
+            Port = port;
             return this;
         }
 
-        public GrpcHostBuilder Config(string configDir = "", string configName = "")
+        public GrpcHostBuilder UseConsul(string serviceName,string serviceVersion = "", string consulAddrSection = "")
         {
-            if(!string.IsNullOrEmpty(configDir))
-                this.configDir = configDir;
+            ServiceName = serviceName;
+            ServiceVersion = serviceVersion;
+            if(!string.IsNullOrEmpty(consulAddrSection))
+            {
+                ConsulAddrSection = consulAddrSection;
+            }
+            return this;
+        }
+
+        public GrpcHostBuilder UseConfig(string configDir = "", string configName = "")
+        {
+            if (!string.IsNullOrEmpty(configDir))
+                this.ConfigDir = configDir;
 
             if (!string.IsNullOrEmpty(configName))
-                this.configName = configName;
+                this.ConfigName = configName;
 
             return this;
         }
 
-        public GrpcHostBuilder Host(string ip = "", int port = 0)
+        public GrpcHostBuilder UseInterceptor<TInterceptor>() where TInterceptor : ServerInterceptor
         {
-            ipAddress = ip;
-            this.port = port;
-
+            InterceptorTypes.Add(typeof(TInterceptor));
             return this;
         }
 
-        public GrpcHostBuilder GrpcServer(Func<IServiceProvider, ServerServiceDefinition> serverServiceDefinition)
+        public GrpcHostBuilder UseGrpcServer(Func<IServiceProvider, ServerServiceDefinition> grpcServer)
         {
-            grpcServer = serverServiceDefinition;
-
+            GrpcServers.Add(grpcServer);
             return this;
         }
 
-        public GrpcHostBuilder ConsulAddrSetion(string consulAddrSetion)
+        public GrpcHostBuilder UseExceptionHandler(int defaultCode)
         {
-            consulAddrSection = consulAddrSetion;
-
+            DefaultCode = defaultCode;
             return this;
-        }
-
-        public GrpcHostBuilder Startup<T>()
-        {
-            startupType = typeof(T);
-
-            return this;
-        }
-
-        public void Build()
-        {
-            CheckParameter();
-
-            var env = Environment.GetEnvironmentVariable(envVarName);
-
-            var host = new HostBuilder()
-                .ConfigureAppConfiguration(cfg => {
-                    cfg
-                        .AddJsonFile($"{configDir}/{configName}.json", optional: true, reloadOnChange: true)
-                        .AddJsonFile($"{configDir}/{configName}.{env}.json", optional: true, reloadOnChange: true);
-                })
-                .ConfigureServices((ctx, srv) => {
-                    
-                    srv.AddConsulDiscovery(new Uri(ctx.Configuration.GetSection(consulAddrSection).Value), cfg => {
-                        cfg.UseCache(10);
-                    });
-                    InitStartup(srv, ctx.Configuration);
-                    InitGrpcServer(srv);
-                })
-                .ConfigureLogging((hostContext, configLogging) =>
-                {
-                    configLogging.AddConsole();
-                })
-                .Build();
-
-            
-            host.Run();
-        }
-
-        private void InitGrpcServer(IServiceCollection srv)
-        {
-            srv.AddSingleton<IGrpcHostOption>(new GrpcHostOption(serviceName, grpcServer, ipAddress, port));
-            srv.AddHostedService<GrpcHostService>();
-        }
-
-        private void CheckParameter()
-        {
-            if (string.IsNullOrEmpty(serviceName))
-                throw new ArgumentException("parameter can not be empty", nameof(serviceName));
-        }
-
-        private void InitStartup(IServiceCollection services, IConfiguration configuration)
-        {
-            if (startupType == null)
-                return;
-
-            var oneParaConstr = startupType.GetConstructors().FirstOrDefault(p=>p.GetParameters().Count() == 1);
-            if (oneParaConstr != null)
-            {
-                dynamic startup = oneParaConstr.Invoke(new object[]{ configuration });
-                startup.ConfigureServices(services);
-                return;
-            }
-
-            var defaultConstr = startupType.GetConstructors().FirstOrDefault(p => p.GetParameters().Count() == 0);
-            if (defaultConstr != null)
-            {
-                dynamic startup = defaultConstr.Invoke(null);
-                startup.ConfigureServices(services);
-                return;
-            }
         }
     }
 }
+

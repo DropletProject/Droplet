@@ -11,10 +11,10 @@ namespace Droplet.Bootstrapper
         public DropletBuilder(IServiceCollection services, List<Assembly> assembly)
         {
             ServiceCollection = services;
-            RegisterAssemblys = assembly;
+            RegisterAssemblies = assembly;
         }
 
-        public IReadOnlyList<Assembly> RegisterAssemblys { get; private set; }
+        public List<Assembly> RegisterAssemblies { get; private set; }
 
         public IServiceCollection ServiceCollection { get; private set; }
     }
